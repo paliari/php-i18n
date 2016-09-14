@@ -13,5 +13,10 @@
     ],
     "require": {
         "symfony/yaml": "^3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Paliari\\": "src"
+        }
     }
 }
