@@ -11,5 +11,7 @@
             "email": "dflourusso@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "symfony/yaml": "^3.1"
+    }
 }
