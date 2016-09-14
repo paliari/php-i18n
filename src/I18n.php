@@ -40,7 +40,7 @@ class I18n
      */
     public function locale($locale = '')
     {
-        $locale               = $locale ?: $this->current_locale;
+        $locale = $locale ?: $this->current_locale;
 
         return @$this->locales[$locale] ?: $this->parse($locale);
     }

@@ -1,22 +1,22 @@
 {
-    "name": "paliari/php-i18n",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Marcos Paliari",
-            "email": "marcos@paliari.com.br"
-        },
-        {
-            "name": "Daniel Fernando Lourusso",
-            "email": "dflourusso@gmail.com"
-        }
-    ],
-    "require": {
-        "symfony/yaml": "^3.1"
+  "name": "paliari/php-i18n",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marcos Paliari",
+      "email": "marcos@paliari.com.br"
     },
-    "autoload": {
-        "psr-4": {
-            "Paliari\\": "src"
-        }
+    {
+      "name": "Daniel Fernando Lourusso",
+      "email": "dflourusso@gmail.com"
     }
+  ],
+  "require": {
+    "symfony/yaml": "^3.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Paliari\\": "src"
+    }
+  }
 }
