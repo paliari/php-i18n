@@ -2,3 +2,6 @@
 .idea/
 /teste.php
 /tmp/
+/.settings/
+/.buildpath
+/.project
