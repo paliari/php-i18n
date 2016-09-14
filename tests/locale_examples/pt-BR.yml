@@ -1,0 +1,7 @@
+pt-BR:
+  hello: Olá I18n
+  user:
+    name: Nome do usuário
+  errors:
+    messages:
+      unauthorized: Não autorizado

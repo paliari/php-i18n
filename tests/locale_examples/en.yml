@@ -1,0 +1,7 @@
+en:
+  hello: Hello I18n
+  user:
+    name: User Name
+  errors:
+    messages:
+      unauthorized: Unauthorized
