@@ -1,0 +1,11 @@
+{
+    "name": "paliari/php-i18n",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marcos Paliari",
+            "email": "marcos@paliari.com.br"
+        }
+    ],
+    "require": {}
+}
