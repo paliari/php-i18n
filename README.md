@@ -1,22 +1,8 @@
 ## php-i18n
 
 #### Installation
-
-```json
-	{
-		"repositories": [
-			{
-				"url": "https://github.com/paliari/php-i18n",
-				"type": "git"
-    		}
-  		],
-	    "require": {
-	    	"paliari/php-i18n": "dev-master"
-	  	}
-	}
-```	
 	
-	$ composer install
+	$ composer require paliari/php-i18n
 
 #### Configuration
 
