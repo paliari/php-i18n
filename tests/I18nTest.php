@@ -59,4 +59,11 @@ class I18nTest extends TestCase
         $this->assertEquals('Olá I18n', $this->i18n->hum('hello'));
         $this->assertEquals('Não autorizado', $this->i18n->hum_error_message('unauthorized'));
     }
+
+    public function testReplaceParams() {
+        $str = 'Olá %{first_name} %{second_name}';
+        $params = ['first_name' => 'Daniel', 'second_name' => 'Fernando'];
+        $expected = 'Olá Daniel Fernando';
+        $this->assertEquals($expected, $this->i18n->replaceParams($str, $params));
+    }
 }
