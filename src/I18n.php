@@ -47,20 +47,20 @@ class I18n
     {
         $locale = $locale ?: $this->current_locale;
 
-        return @$this->locales[$locale] ?: $this->parse($locale);
+        return @$this->locales[$locale] ?: $this->getLocale($locale);
     }
 
     /**
      *
      * @param string $key
-     * @param array $replaces
+     * @param array  $replaces
      *
      * @return mixed
      */
     public function hum($key, $replaces = [])
     {
         $content = $this->locale();
-        $keys = explode('.', $key);
+        $keys    = explode('.', $key);
         foreach ($keys as $k) {
             $content = @$content[$k];
         }
@@ -71,7 +71,7 @@ class I18n
     /**
      *
      * @param string $error
-     * @param array $replaces
+     * @param array  $replaces
      *
      * @return mixed
      */
@@ -88,7 +88,7 @@ class I18n
      */
     protected function parse($locale)
     {
-        $i18n = [];
+        $i18n  = [];
         $files = "{$this->getLocalesPath()}/*$locale.yml";
         foreach (glob($files) as $file) {
             $i18n = array_merge($i18n, Yaml::parse(file_get_contents($file))[$locale]);
@@ -99,14 +99,14 @@ class I18n
 
     /**
      *
-     * @param $message
+     * @param       $message
      * @param array $replaces
      *
      * @return mixed
      */
     public function replaceParams($message, $replaces = [])
     {
-        if (! $replaces) {
+        if (!$replaces) {
             return $message;
         }
         foreach ($replaces as $k => $v) {
@@ -124,7 +124,7 @@ class I18n
      */
     protected function getLocalesPath()
     {
-        if (! $this->locales_path) {
+        if (!$this->locales_path) {
             throw new \Exception('I18n locales path not found!');
         }
 
@@ -141,7 +141,7 @@ class I18n
      */
     public function setLocalesPath($path)
     {
-        if (! $path) {
+        if (!$path) {
             throw new \Exception('Locales path cannot be blank');
         }
         $this->locales_path = $path;
@@ -161,16 +161,48 @@ class I18n
     /**
      *
      * @param string $current_locale (pt-BR|en)
+     *
      * @return $this
      * @throws \Exception
      */
     public function setCurrentLocale($current_locale)
     {
-        if (! $current_locale) {
+        if (!$current_locale) {
             throw new \Exception('Locale cannot be blank');
         }
         $this->current_locale = $current_locale;
 
         return $this;
     }
+
+    /**
+     * @param string $locale
+     *
+     * @return array
+     */
+    protected function getLocale($locale)
+    {
+        $file = "{$this->getLocalesPath()}/cache/$locale.php";
+        if (file_exists($file)) {
+            return include $file;
+        }
+
+        return $this->parse($locale);
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return string
+     */
+    public function saveCache($locale)
+    {
+        $path = $this->getLocalesPath() . '/cache';
+        @mkdir($path);
+        $content = '<?php return ' . var_export($this->parse($locale), true) . ';';
+        file_put_contents("$path/$locale.php", $content);
+
+        return "Saved in $path/$locale.php";
+    }
+
 }
