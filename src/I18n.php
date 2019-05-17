@@ -1,7 +1,9 @@
 <?php
+
 namespace Paliari;
 
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Yaml,
+    Exception;
 
 /**
  * Class I18n
@@ -120,12 +122,12 @@ class I18n
      * Obtem o caminho para os arquivos yml de traducao
      *
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getLocalesPath()
     {
         if (!$this->locales_path) {
-            throw new \Exception('I18n locales path not found!');
+            throw new Exception('I18n locales path not found!');
         }
 
         return $this->locales_path;
@@ -137,12 +139,12 @@ class I18n
      * @param string $path
      *
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function setLocalesPath($path)
     {
         if (!$path) {
-            throw new \Exception('Locales path cannot be blank');
+            throw new Exception('Locales path cannot be blank');
         }
         $this->locales_path = $path;
 
@@ -163,12 +165,12 @@ class I18n
      * @param string $current_locale (pt-BR|en)
      *
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function setCurrentLocale($current_locale)
     {
         if (!$current_locale) {
-            throw new \Exception('Locale cannot be blank');
+            throw new Exception('Locale cannot be blank');
         }
         $this->current_locale = $current_locale;
 
