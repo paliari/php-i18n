@@ -10,7 +10,7 @@ class I18nTest extends TestCase
 
     protected $i18n;
 
-    public function __construct()
+    protected function setUp(): void
     {
         $this->i18n = I18n::instance();
     }
@@ -26,27 +26,21 @@ class I18nTest extends TestCase
         $this->assertEquals('en', $this->i18n->getCurrentLocale());
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testSetCurrentLocaleToBlank()
     {
+        $this->expectException(Exception::class);
         $this->i18n->setCurrentLocale('');
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testWithoutConfigure()
     {
+        $this->expectException(Exception::class);
         $this->i18n->hum('hello');
     }
 
-    /**
-     * @expectedException Exception
-     */
     public function testSetLocalesPathToBlank()
     {
+        $this->expectException(Exception::class);
         $this->i18n->setLocalesPath('');
     }
 
@@ -60,9 +54,10 @@ class I18nTest extends TestCase
         $this->assertEquals('Não autorizado', $this->i18n->hum_error_message('unauthorized'));
     }
 
-    public function testReplaceParams() {
-        $str = 'Olá %{first_name} %{second_name}';
-        $params = ['first_name' => 'Daniel', 'second_name' => 'Fernando'];
+    public function testReplaceParams()
+    {
+        $str      = 'Olá %{first_name} %{second_name}';
+        $params   = ['first_name' => 'Daniel', 'second_name' => 'Fernando'];
         $expected = 'Olá Daniel Fernando';
         $this->assertEquals($expected, $this->i18n->replaceParams($str, $params));
     }
