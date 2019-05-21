@@ -31,7 +31,7 @@ pt-BR:
 Say to the plugin where this files were placed
 
 ```php
-\Paliari\I18n::instance()->setLocalesPath(__DIR__ . '/config/locales')->setCurrentLocale('pt-BR');
+\Paliari\I18n::instance()->addLocalesPath(__DIR__ . '/config/locales')->setCurrentLocale('pt-BR');
 ```
 
 #### Usage 
