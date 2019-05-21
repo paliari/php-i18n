@@ -131,7 +131,7 @@ class I18n
      *
      * @return mixed
      */
-    public static function hum_error_message($error, $replaces = [])
+    public static function humErrorMessage($error, $replaces = [])
     {
         return static::instance()->hum("errors.messages.$error", $replaces);
     }

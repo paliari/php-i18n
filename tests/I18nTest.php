@@ -45,10 +45,10 @@ class I18nTest extends TestCase
     {
         $this->i18n->addLocalesPath(__DIR__ . '/locale_examples');
         $this->assertEquals('Hello I18n', $this->i18n->hum('hello'));
-        $this->assertEquals('Unauthorized', $this->i18n->hum_error_message('unauthorized'));
+        $this->assertEquals('Unauthorized', $this->i18n->humErrorMessage('unauthorized'));
         $this->i18n->setCurrentLocale('pt-BR');
         $this->assertEquals('Olá I18n', $this->i18n->hum('hello'));
-        $this->assertEquals('Não autorizado', $this->i18n->hum_error_message('unauthorized'));
+        $this->assertEquals('Não autorizado', $this->i18n->humErrorMessage('unauthorized'));
     }
 
     public function testReplaceParams()
