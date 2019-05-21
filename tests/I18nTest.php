@@ -1,6 +1,6 @@
 <?php
-use PHPUnit\Framework\TestCase;
-use Paliari\I18n;
+use PHPUnit\Framework\TestCase,
+    Paliari\I18n;
 
 /**
  * Class I18nTest
@@ -8,6 +8,9 @@ use Paliari\I18n;
 class I18nTest extends TestCase
 {
 
+    /**
+     * @var I18n
+     */
     protected $i18n;
 
     protected function setUp(): void
@@ -32,21 +35,15 @@ class I18nTest extends TestCase
         $this->i18n->setCurrentLocale('');
     }
 
-    public function testWithoutConfigure()
-    {
-        $this->expectException(Exception::class);
-        $this->i18n->hum('hello');
-    }
-
     public function testSetLocalesPathToBlank()
     {
         $this->expectException(Exception::class);
-        $this->i18n->setLocalesPath('');
+        $this->i18n->addLocalesPath('');
     }
 
     public function testSetLocalesPathAndTranslate()
     {
-        $this->i18n->setLocalesPath(__DIR__ . '/locale_examples');
+        $this->i18n->addLocalesPath(__DIR__ . '/locale_examples');
         $this->assertEquals('Hello I18n', $this->i18n->hum('hello'));
         $this->assertEquals('Unauthorized', $this->i18n->hum_error_message('unauthorized'));
         $this->i18n->setCurrentLocale('pt-BR');
@@ -61,4 +58,5 @@ class I18nTest extends TestCase
         $expected = 'Olá Daniel Fernando';
         $this->assertEquals($expected, $this->i18n->replaceParams($str, $params));
     }
+
 }

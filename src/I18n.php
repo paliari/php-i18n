@@ -19,9 +19,15 @@ class I18n
 
     /**
      *
+     * @var array
+     */
+    protected $locales_paths = [];
+
+    /**
+     *
      * @var string
      */
-    protected $locales_path = '';
+    protected $cache_path;
 
     /**
      *
@@ -36,6 +42,54 @@ class I18n
     public static function instance()
     {
         return static::$_instance = static::$_instance ?: new static();
+    }
+
+    /**
+     * @return string
+     */
+    public function getCachePath(): string
+    {
+        return $this->cache_path ?: sys_get_temp_dir();
+    }
+
+    /**
+     * @param string $cache_path
+     */
+    public function setCachePath(string $cache_path): void
+    {
+        $this->cache_path = $cache_path;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLocalesPaths(): array
+    {
+        return $this->locales_paths;
+    }
+
+    /**
+     * @param array $locales_paths
+     */
+    public function setLocalesPaths(array $locales_paths): void
+    {
+        $this->locales_paths = $locales_paths;
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return I18n
+     * @throws Exception
+     */
+    public function addLocalesPath(string $path): self
+    {
+        if (!$path) {
+            throw new Exception('Locales path cannot be blank');
+        }
+        $this->locales_paths[] = $path;
+
+        return $this;
     }
 
     /**
@@ -86,17 +140,26 @@ class I18n
      *
      * @param string $locale
      *
-     * @return mixed
+     * @return array
      */
     protected function parse($locale)
     {
-        $i18n  = [];
-        $files = "{$this->getLocalesPath()}/*$locale.yml";
+        $i18n = [];
+        foreach ($this->getLocalesPaths() as $path) {
+            $i18n = $this->parseYml($path, $locale, $i18n);
+        }
+
+        return $this->locales[$locale] = $i18n;
+    }
+
+    protected function parseYml(string $path, string $locale, array $i18n)
+    {
+        $files = "{$path}/*$locale.yml";
         foreach (glob($files) as $file) {
             $i18n = array_merge($i18n, Yaml::parse(file_get_contents($file))[$locale]);
         }
 
-        return $this->locales[$locale] = $i18n;
+        return $i18n;
     }
 
     /**
@@ -116,39 +179,6 @@ class I18n
         }
 
         return $message;
-    }
-
-    /**
-     * Obtem o caminho para os arquivos yml de traducao
-     *
-     * @return string
-     * @throws Exception
-     */
-    protected function getLocalesPath()
-    {
-        if (!$this->locales_path) {
-            throw new Exception('I18n locales path not found!');
-        }
-
-        return $this->locales_path;
-    }
-
-    /**
-     * Atribui o caminho dos arquivos yml de traducao
-     *
-     * @param string $path
-     *
-     * @return $this
-     * @throws Exception
-     */
-    public function setLocalesPath($path)
-    {
-        if (!$path) {
-            throw new Exception('Locales path cannot be blank');
-        }
-        $this->locales_path = $path;
-
-        return $this;
     }
 
     /**
@@ -184,12 +214,22 @@ class I18n
      */
     protected function getLocale($locale)
     {
-        $file = "{$this->getLocalesPath()}/cache/$locale.php";
+        $file = $this->cacheFile($locale);
         if (file_exists($file)) {
-            return include $file;
+            return include "$file";
         }
 
         return $this->parse($locale);
+    }
+
+    protected function cacheFile($locale)
+    {
+        $path = $this->getCachePath();
+        if (!file_exists($path)) {
+            @mkdir($path, 0777, true);
+        }
+
+        return "$path/i18n-locale-$locale.php";
     }
 
     /**
@@ -199,12 +239,11 @@ class I18n
      */
     public function saveCache($locale)
     {
-        $path = $this->getLocalesPath() . '/cache';
-        @mkdir($path);
+        $file    = $this->cacheFile($locale);
         $content = '<?php return ' . var_export($this->parse($locale), true) . ';';
-        file_put_contents("$path/$locale.php", $content);
+        file_put_contents($file, $content);
 
-        return "Saved in $path/$locale.php";
+        return "Saved in $file.php";
     }
 
 }
