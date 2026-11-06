@@ -1,5 +1,5 @@
 #!/bin/sh
 
 mkdir -p tmp/coverage
-phpunit --coverage-html tmp/coverage
+XDEBUG_MODE=coverage phpunit --coverage-html tmp/coverage
 open tmp/coverage/index.html

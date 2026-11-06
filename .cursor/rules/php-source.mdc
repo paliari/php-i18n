@@ -28,4 +28,14 @@ public function addLocalesPath(string $path): self
 
 - Propriedades em snake_case (`$current_locale`, `$locales_paths`); métodos em camelCase.
 - Prefira tipos escalares/retorno em métodos novos, sem alterar assinaturas públicas existentes.
-- Evite o operador `@` em código novo; prefira `isset()` / `??`.
+- Não use o operador `@`: no PHP 8 o error handler ainda é chamado e frameworks registram o aviso.
+  Use `??`, `isset()`, `is_array()` / `array_key_exists()`, `glob(...) ?: []`.
+- Não passe `null` para parâmetros de funções nativas (deprecated desde 8.1); faça cast ou valide antes.
+
+```php
+// ❌ BAD
+return @$this->locales[$locale] ?: $this->getLocale($locale);
+
+// ✅ GOOD
+return $this->locales[$locale] ?? $this->getLocale($locale);
+```

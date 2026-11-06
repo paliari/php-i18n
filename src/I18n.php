@@ -97,13 +97,13 @@ class I18n
      *
      * @param string $locale
      *
-     * @return mixed
+     * @return array
      */
     public function locale($locale = '')
     {
         $locale = $locale ?: $this->current_locale;
 
-        return @$this->locales[$locale] ?: $this->getLocale($locale);
+        return $this->locales[$locale] ?? $this->getLocale($locale);
     }
 
     /**
@@ -111,14 +111,16 @@ class I18n
      * @param string $key
      * @param array  $replaces
      *
-     * @return mixed
+     * @return string|array|null null quando a chave não existe
      */
     public function hum($key, $replaces = [])
     {
         $content = $this->locale();
-        $keys    = explode('.', $key);
-        foreach ($keys as $k) {
-            $content = @$content[$k];
+        foreach (explode('.', $key) as $k) {
+            if (!is_array($content) || !array_key_exists($k, $content)) {
+                return null;
+            }
+            $content = $content[$k];
         }
 
         return $this->replaceParams($content, $replaces);
@@ -129,7 +131,7 @@ class I18n
      * @param string $error
      * @param array  $replaces
      *
-     * @return mixed
+     * @return string|array|null
      */
     public static function humErrorMessage($error, $replaces = [])
     {
@@ -155,8 +157,11 @@ class I18n
     protected function parseYml(string $path, string $locale, array $i18n)
     {
         $files = "{$path}/*$locale.yml";
-        foreach (glob($files) as $file) {
-            $i18n = array_merge($i18n, Yaml::parse(file_get_contents($file))[$locale]);
+        foreach (glob($files) ?: [] as $file) {
+            $content = Yaml::parseFile($file)[$locale] ?? [];
+            if (is_array($content)) {
+                $i18n = array_merge($i18n, $content);
+            }
         }
 
         return $i18n;
@@ -164,18 +169,18 @@ class I18n
 
     /**
      *
-     * @param       $message
-     * @param array $replaces
+     * @param string|array|null $message
+     * @param array             $replaces
      *
-     * @return mixed
+     * @return string|array|null
      */
     public function replaceParams($message, $replaces = [])
     {
-        if (!$replaces) {
+        if (!$replaces || (!is_string($message) && !is_array($message))) {
             return $message;
         }
         foreach ($replaces as $k => $v) {
-            $message = str_replace('%{' . $k . '}', $v, $message);
+            $message = str_replace('%{' . $k . '}', (string)$v, $message);
         }
 
         return $message;
@@ -216,7 +221,7 @@ class I18n
     {
         $file = $this->cacheFile($locale);
         if (file_exists($file)) {
-            return include "$file";
+            return $this->locales[$locale] = include $file;
         }
 
         return $this->parse($locale);
@@ -225,9 +230,7 @@ class I18n
     protected function cacheFile($locale)
     {
         $path = $this->getCachePath();
-        if (!file_exists($path)) {
-            @mkdir($path, 0777, true);
-        }
+        is_dir($path) || mkdir($path, 0777, true) || is_dir($path);
 
         return "$path/i18n-locale-$locale.php";
     }
@@ -243,7 +246,7 @@ class I18n
         $content = '<?php return ' . var_export($this->parse($locale), true) . ';';
         file_put_contents($file, $content);
 
-        return "Saved in $file.php";
+        return "Saved in $file.";
     }
 
 }

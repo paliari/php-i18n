@@ -6,14 +6,16 @@ alwaysApply: false
 
 # Testes
 
-- PHPUnit 8: `extends TestCase`, `protected function setUp(): void`.
+- PHPUnit 11.5+ (compatível até 13): `extends TestCase`, `protected function setUp(): void`.
+  Use atributos (`#[DataProvider]`), não annotations em docblock.
 - Arquivos terminam em `Test.php` (ver `phpunit.xml`).
-- Fixtures de locale ficam em `tests/locale_examples/` (`en.yml`, `pt-BR.yml`);
-  ao adicionar chave, adicione em todos os locales.
-- `I18n::instance()` é singleton: o estado (locale atual, paths, cache em memória)
-  persiste entre testes. Não dependa da ordem; restaure o estado
-  (ex.: `setCurrentLocale('pt-BR')`) ou isole-o quando necessário.
-- Cache em disco usa `sys_get_temp_dir()` por padrão; em testes de cache, use
-  `setCachePath()` com diretório temporário e limpe depois.
+- `phpunit.xml` falha o teste em qualquer deprecation, notice ou warning, inclusive
+  os suprimidos com `@`. Não relaxe essa configuração; corrija a origem.
+- Fixtures de locale ficam em `tests/locale_examples/` (`en.yml`, `pt-BR.yml`;
+  `invalid.fr.yml` é propositalmente sem a chave raiz `fr`).
+  Ao adicionar chave, adicione em todos os locales válidos.
+- `setUp()` reseta o singleton via `ReflectionProperty(I18n::class, '_instance')`
+  e define um `setCachePath()` temporário único, removido no `tearDown()`.
+  Não dependa da ordem dos testes.
 - Exceções: `$this->expectException(Exception::class)` antes da chamada.
 - Todo código novo em `src/` precisa de teste. Meta: 100% de cobertura (`bin/code_coverage`).

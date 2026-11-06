@@ -14,12 +14,15 @@ Uma única classe: `Paliari\I18n` em `src/I18n.php` (singleton via `I18n::instan
 - `bin/code_coverage` — gera cobertura HTML em `tmp/coverage`
 
 ## Comandos
-- Testes: `vendor/bin/phpunit`
-- Cobertura: `bin/code_coverage`
+- Testes: `composer test` (ou `vendor/bin/phpunit`)
+- Cobertura: `bin/code_coverage` (requer Xdebug ou PCOV)
 
 ## Restrições
-- Compatível com PHP 7.3: não usar typed properties, arrow functions, `match`, enums, union types, nullsafe.
-- Dependências: `symfony/yaml ^4.2`, `phpunit/phpunit ^8.1`. Não adicionar dependências sem necessidade.
+- Compatível com PHP >= 8.2, testado em 8.5: não usar recursos de 8.3+
+  (typed class constants, `#[\Override]`, `json_validate`, property hooks, pipe operator).
+- Dependências: `symfony/yaml ^7.4 || ^8.0`, `phpunit/phpunit ^11.5 || ^12.5 || ^13.0`.
+  Não adicionar dependências sem necessidade.
+- O código não pode emitir warning, notice ou deprecation (nem suprimidos com `@`).
 - É uma biblioteca pública: não quebrar a API (`instance`, `hum`, `humErrorMessage`, `addLocalesPath`,
   `setCurrentLocale`, `getCurrentLocale`, `replaceParams`, `saveCache`, getters/setters de paths).
 - Ao alterar comportamento público, atualizar o `README.md`.
