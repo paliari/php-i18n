@@ -1,0 +1,19 @@
+---
+description: Convenções de testes PHPUnit
+globs: tests/**/*.php
+alwaysApply: false
+---
+
+# Testes
+
+- PHPUnit 8: `extends TestCase`, `protected function setUp(): void`.
+- Arquivos terminam em `Test.php` (ver `phpunit.xml`).
+- Fixtures de locale ficam em `tests/locale_examples/` (`en.yml`, `pt-BR.yml`);
+  ao adicionar chave, adicione em todos os locales.
+- `I18n::instance()` é singleton: o estado (locale atual, paths, cache em memória)
+  persiste entre testes. Não dependa da ordem; restaure o estado
+  (ex.: `setCurrentLocale('pt-BR')`) ou isole-o quando necessário.
+- Cache em disco usa `sys_get_temp_dir()` por padrão; em testes de cache, use
+  `setCachePath()` com diretório temporário e limpe depois.
+- Exceções: `$this->expectException(Exception::class)` antes da chamada.
+- Todo código novo em `src/` precisa de teste. Meta: 100% de cobertura (`bin/code_coverage`).

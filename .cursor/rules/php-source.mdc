@@ -1,0 +1,31 @@
+---
+description: Convenções de código PHP da biblioteca
+globs: src/**/*.php
+alwaysApply: false
+---
+
+# Convenções PHP
+
+- Indentação de 4 espaços; chaves de classe/método na linha seguinte.
+- Imports agrupados: `use Symfony\Component\Yaml\Yaml, Exception;`
+- Alinhar `=` em blocos de atribuições consecutivas.
+- Docblock em todo método com `@param`, `@return` e `@throws` quando aplicável.
+- Setters de configuração são fluentes e retornam `$this` / `self`.
+- Use `static::` (não `self::`) para permitir extensão da classe.
+- Valores obrigatórios em branco lançam `Exception` com mensagem em inglês:
+
+```php
+public function addLocalesPath(string $path): self
+{
+    if (!$path) {
+        throw new Exception('Locales path cannot be blank');
+    }
+    $this->locales_paths[] = $path;
+
+    return $this;
+}
+```
+
+- Propriedades em snake_case (`$current_locale`, `$locales_paths`); métodos em camelCase.
+- Prefira tipos escalares/retorno em métodos novos, sem alterar assinaturas públicas existentes.
+- Evite o operador `@` em código novo; prefira `isset()` / `??`.

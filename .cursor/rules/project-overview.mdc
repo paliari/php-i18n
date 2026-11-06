@@ -1,0 +1,26 @@
+---
+description: Visão geral e restrições do php-i18n
+alwaysApply: true
+---
+
+# php-i18n
+
+Biblioteca Composer (`paliari/php-i18n`) de internacionalização baseada em YAML.
+Uma única classe: `Paliari\I18n` em `src/I18n.php` (singleton via `I18n::instance()`).
+
+## Estrutura
+- `src/` — código (PSR-4, namespace `Paliari\`)
+- `tests/` — PHPUnit; fixtures YAML em `tests/locale_examples/`
+- `bin/code_coverage` — gera cobertura HTML em `tmp/coverage`
+
+## Comandos
+- Testes: `vendor/bin/phpunit`
+- Cobertura: `bin/code_coverage`
+
+## Restrições
+- Compatível com PHP 7.3: não usar typed properties, arrow functions, `match`, enums, union types, nullsafe.
+- Dependências: `symfony/yaml ^4.2`, `phpunit/phpunit ^8.1`. Não adicionar dependências sem necessidade.
+- É uma biblioteca pública: não quebrar a API (`instance`, `hum`, `humErrorMessage`, `addLocalesPath`,
+  `setCurrentLocale`, `getCurrentLocale`, `replaceParams`, `saveCache`, getters/setters de paths).
+- Ao alterar comportamento público, atualizar o `README.md`.
+- Manter 100% de cobertura de testes.
