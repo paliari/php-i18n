@@ -6,11 +6,13 @@ alwaysApply: false
 
 # Arquivos de locale
 
-- A chave raiz é o código do locale (`pt-BR:`, `en:`); o loader lê `Yaml::parse(...)[$locale]`.
-- O nome do arquivo precisa terminar em `{locale}.yml` (glob `*{locale}.yml`), ex.:
-  `pt-BR.yml`, `models.pt-BR.yml`, `errors.en.yml`.
-- Vários arquivos do mesmo locale são mesclados com `array_merge` (merge raso:
-  chaves de topo repetidas sobrescrevem, não fazem merge profundo).
+- A chave raiz é o código do locale (`pt-BR:`, `en:`); o loader lê `Yaml::parseFile(...)[$locale]`.
+  Raiz ausente, escalar ou arquivo vazio são ignorados.
+- Nome do arquivo: `{locale}.yml` ou `{prefixo}{.|-|_}{locale}.yml`, ex.:
+  `pt-BR.yml`, `models.pt-BR.yml`, `menu-en.yml`, `labels_en.yml`. `screen.yml` não é carregado para `en`.
+- Locale válido: `/^[A-Za-z]{2,8}([_-][A-Za-z0-9]{1,8})*$/` (`en`, `pt-BR`, `zh_Hant`, `es-419`).
+- Vários arquivos do mesmo locale são lidos em ordem alfabética e mesclados com `array_merge`
+  (merge raso: chaves de topo repetidas sobrescrevem, não fazem merge profundo).
 - Parâmetros usam `%{nome}`: `welcome: Olá %{first_name}` → `hum('welcome', ['first_name' => 'Ana'])`.
 - Mensagens de erro ficam em `errors.messages.<chave>` (lidas por `humErrorMessage`).
 - Mantenha as mesmas chaves em todos os locales.

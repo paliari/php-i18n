@@ -29,7 +29,12 @@ public function addLocalesPath(string $path): self
 - Propriedades em snake_case (`$current_locale`, `$locales_paths`); métodos em camelCase.
 - Prefira tipos escalares/retorno em métodos novos, sem alterar assinaturas públicas existentes.
 - Não use o operador `@`: no PHP 8 o error handler ainda é chamado e frameworks registram o aviso.
-  Use `??`, `isset()`, `is_array()` / `array_key_exists()`, `glob(...) ?: []`.
+  Use `??`, `isset()`, `is_array()` / `array_key_exists()`.
+- Operações de disco que podem falhar (`mkdir`, `file_put_contents`, `rename`) passam por
+  `runOrFail()`, que converte o warning em `RuntimeException`.
+- Não use `glob()` com paths do usuário (`[`, `*`, `?` são curingas); liste com `scandir()` e filtre.
+- Valide o locale com `assertValidLocale()` antes de usá-lo em nome de arquivo ou `include`.
+- `instance()` guarda uma única instância para a classe e suas subclasses: quem chamar primeiro define a classe.
 - Não passe `null` para parâmetros de funções nativas (deprecated desde 8.1); faça cast ou valide antes.
 
 ```php

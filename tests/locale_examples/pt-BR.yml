@@ -1,7 +1,9 @@
 pt-BR:
   hello: Olá I18n
+  welcome: Bem-vindo %{name}
   user:
     name: Nome do usuário
   errors:
     messages:
       unauthorized: Não autorizado
+      min_length: Deve ter no mínimo %{count} caracteres

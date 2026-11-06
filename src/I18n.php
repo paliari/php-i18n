@@ -3,7 +3,10 @@
 namespace Paliari;
 
 use Symfony\Component\Yaml\Yaml,
-    Exception;
+    Exception,
+    InvalidArgumentException,
+    RuntimeException,
+    Stringable;
 
 /**
  * Class I18n
@@ -12,6 +15,8 @@ use Symfony\Component\Yaml\Yaml,
  */
 class I18n
 {
+
+    const LOCALE_PATTERN = '/^[A-Za-z]{2,8}([_-][A-Za-z0-9]{1,8})*$/';
 
     private static $_instance;
 
@@ -54,10 +59,14 @@ class I18n
 
     /**
      * @param string $cache_path
+     *
+     * @return $this
      */
-    public function setCachePath(string $cache_path): void
+    public function setCachePath(string $cache_path): self
     {
         $this->cache_path = $cache_path;
+
+        return $this;
     }
 
     /**
@@ -70,10 +79,14 @@ class I18n
 
     /**
      * @param array $locales_paths
+     *
+     * @return $this
      */
-    public function setLocalesPaths(array $locales_paths): void
+    public function setLocalesPaths(array $locales_paths): self
     {
         $this->locales_paths = $locales_paths;
+
+        return $this;
     }
 
     /**
@@ -93,11 +106,12 @@ class I18n
     }
 
     /**
-     * Obtem o local.
+     * Retorna as traduções do locale.
      *
      * @param string $locale
      *
      * @return array
+     * @throws InvalidArgumentException
      */
     public function locale($locale = '')
     {
@@ -156,8 +170,7 @@ class I18n
 
     protected function parseYml(string $path, string $locale, array $i18n)
     {
-        $files = "{$path}/*$locale.yml";
-        foreach (glob($files) ?: [] as $file) {
+        foreach ($this->localeFiles($path, $locale) as $file) {
             $content = Yaml::parseFile($file)[$locale] ?? [];
             if (is_array($content)) {
                 $i18n = array_merge($i18n, $content);
@@ -168,6 +181,32 @@ class I18n
     }
 
     /**
+     * Arquivos do locale no path: `{locale}.yml` ou `{prefixo}[.-_]{locale}.yml`, em ordem alfabética.
+     *
+     * @param string $path
+     * @param string $locale
+     *
+     * @return array
+     */
+    protected function localeFiles(string $path, string $locale): array
+    {
+        if (!is_dir($path)) {
+            return [];
+        }
+        $pattern = '/^(.+[._-])?' . preg_quote($locale, '/') . '\.yml$/';
+        $files   = [];
+        foreach (scandir($path) ?: [] as $name) {
+            $file = "$path/$name";
+            if (preg_match($pattern, $name) && is_file($file)) {
+                $files[] = $file;
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * Substitui `%{chave}` pelos valores escalares, null ou Stringable; outros valores são ignorados.
      *
      * @param string|array|null $message
      * @param array             $replaces
@@ -180,7 +219,9 @@ class I18n
             return $message;
         }
         foreach ($replaces as $k => $v) {
-            $message = str_replace('%{' . $k . '}', (string)$v, $message);
+            if (is_scalar($v) || $v === null || $v instanceof Stringable) {
+                $message = str_replace('%{' . $k . '}', (string)$v, $message);
+            }
         }
 
         return $message;
@@ -207,6 +248,7 @@ class I18n
         if (!$current_locale) {
             throw new Exception('Locale cannot be blank');
         }
+        $this->assertValidLocale($current_locale);
         $this->current_locale = $current_locale;
 
         return $this;
@@ -216,9 +258,11 @@ class I18n
      * @param string $locale
      *
      * @return array
+     * @throws InvalidArgumentException
      */
     protected function getLocale($locale)
     {
+        $this->assertValidLocale($locale);
         $file = $this->cacheFile($locale);
         if (file_exists($file)) {
             return $this->locales[$locale] = include $file;
@@ -227,26 +271,89 @@ class I18n
         return $this->parse($locale);
     }
 
+    /**
+     * O locale é usado no nome de arquivo que recebe include, então precisa ser validado antes.
+     *
+     * @param mixed $locale
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function assertValidLocale($locale): void
+    {
+        if (!is_string($locale) || !preg_match(static::LOCALE_PATTERN, $locale)) {
+            throw new InvalidArgumentException('Invalid locale: ' . (is_scalar($locale) ? $locale : gettype($locale)));
+        }
+    }
+
     protected function cacheFile($locale)
     {
-        $path = $this->getCachePath();
-        is_dir($path) || mkdir($path, 0777, true) || is_dir($path);
-
-        return "$path/i18n-locale-$locale.php";
+        return $this->getCachePath() . "/i18n-locale-$locale.php";
     }
 
     /**
      * @param string $locale
      *
      * @return string
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function saveCache($locale)
     {
+        $this->assertValidLocale($locale);
+        $path = $this->getCachePath();
+        if (file_exists($path) && !is_dir($path)) {
+            throw new RuntimeException("Cache path is not a directory: $path");
+        }
+        if (!is_dir($path)) {
+            $this->runOrFail(fn() => mkdir($path, 0777, true) || is_dir($path), "Could not create cache path $path");
+        }
+        if (!is_writable($path)) {
+            throw new RuntimeException("Cache path is not writable: $path");
+        }
         $file    = $this->cacheFile($locale);
+        $tmp     = $file . '.' . uniqid('', true) . '.tmp';
         $content = '<?php return ' . var_export($this->parse($locale), true) . ';';
-        file_put_contents($file, $content);
+        try {
+            $this->runOrFail(fn() => file_put_contents($tmp, $content) !== false && rename($tmp, $file), "Could not save cache in $file");
+        } finally {
+            if (is_file($tmp)) {
+                unlink($tmp);
+            }
+        }
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
 
         return "Saved in $file.";
+    }
+
+    /**
+     * Executa a operação de disco convertendo o warning do PHP em RuntimeException, para não gerar log.
+     *
+     * @param callable $operation deve retornar false em caso de falha
+     * @param string   $message
+     *
+     * @return mixed
+     * @throws RuntimeException
+     */
+    protected function runOrFail(callable $operation, string $message)
+    {
+        $error = '';
+        set_error_handler(function ($no, $msg) use (&$error) {
+            $error = $msg;
+
+            return true;
+        });
+        try {
+            $result = $operation();
+        } finally {
+            restore_error_handler();
+        }
+        if ($result === false) {
+            throw new RuntimeException($error ? "$message: $error" : $message);
+        }
+
+        return $result;
     }
 
 }

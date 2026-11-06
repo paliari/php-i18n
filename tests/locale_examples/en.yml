@@ -1,7 +1,9 @@
 en:
   hello: Hello I18n
+  welcome: Welcome %{name}
   user:
     name: User Name
   errors:
     messages:
       unauthorized: Unauthorized
+      min_length: Must have at least %{count} characters

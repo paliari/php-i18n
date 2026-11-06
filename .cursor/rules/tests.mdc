@@ -11,11 +11,17 @@ alwaysApply: false
 - Arquivos terminam em `Test.php` (ver `phpunit.xml`).
 - `phpunit.xml` falha o teste em qualquer deprecation, notice ou warning, inclusive
   os suprimidos com `@`. Não relaxe essa configuração; corrija a origem.
-- Fixtures de locale ficam em `tests/locale_examples/` (`en.yml`, `pt-BR.yml`;
-  `invalid.fr.yml` é propositalmente sem a chave raiz `fr`).
-  Ao adicionar chave, adicione em todos os locales válidos.
-- `setUp()` reseta o singleton via `ReflectionProperty(I18n::class, '_instance')`
-  e define um `setCachePath()` temporário único, removido no `tearDown()`.
+- Fixtures de locale ficam em `tests/locale_examples/`. Além de `en.yml` e `pt-BR.yml`, há
+  casos de borda propositais: `invalid.fr.yml` (sem raiz), `scalar.it.yml` (raiz escalar),
+  `empty.de.yml` (vazio), `screen.yml` (não pode carregar para `en`).
+  `tests/locale_examples_extra/` testa vários paths e `tests/locale_merge/` o merge raso.
+  Ao adicionar chave em `en.yml`, adicione também em `pt-BR.yml`.
+- `setUp()` reseta o singleton (`newInstance()`) e cria um `$tmp_dir` único, removido
+  recursivamente no `tearDown()`; o cache fica em `$tmp_dir/cache`, que não existe até `saveCache()`.
+  Fixtures que precisam ser alteradas no teste são criadas em `$tmp_dir` com `writeYml()`.
   Não dependa da ordem dos testes.
-- Exceções: `$this->expectException(Exception::class)` antes da chamada.
+- Use `assertSame`, não `assertEquals`.
+- Exceções: `expectException()` / `expectExceptionMessage()` antes da chamada, ou `try/catch`
+  quando precisar verificar algo depois da exceção.
+- Testes de permissão usam `skipIfRoot()`.
 - Todo código novo em `src/` precisa de teste. Meta: 100% de cobertura (`bin/code_coverage`).

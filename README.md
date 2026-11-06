@@ -32,12 +32,20 @@ pt-BR:
 > - models.en.yml
 > - errors.en.yml
 
+A file is loaded for a locale when its name is `{locale}.yml` or `{prefix}{separator}{locale}.yml`,
+where the separator is `.`, `-` or `_` (`models.en.yml`, `models-en.yml`, `models_en.yml`).
+Files such as `screen.yml` are **not** loaded for `en`.
+Files of the same locale are loaded in alphabetical order and merged with a shallow `array_merge`:
+a top level key repeated in two files is replaced, not merged.
 
-Say to the plugin where this files were placed
+Say to the plugin where this files were placed (you can add more than one path)
 
 ```php
 \Paliari\I18n::instance()->addLocalesPath(__DIR__ . '/config/locales')->setCurrentLocale('pt-BR');
 ```
+
+Locales must match `/^[A-Za-z]{2,8}([_-][A-Za-z0-9]{1,8})*$/` (ex.: `en`, `pt-BR`, `zh_Hant`, `es-419`).
+An invalid locale throws `InvalidArgumentException`, because it is used to build file names.
 
 #### Usage 
 
@@ -50,15 +58,18 @@ Paliari\I18n::humErrorMessage('unauthorized'); // errors.messages.unauthorized
 
 Missing keys return `null` without triggering any warning or deprecation notice.
 
+Replace values can be scalars, `null` or `Stringable` objects. Arrays and other objects are ignored
+and the `%{placeholder}` is kept in the text.
+
 #### Cache
 
 ```php
-$i18n = Paliari\I18n::instance();
-$i18n->setCachePath(__DIR__ . '/tmp');
-$i18n->saveCache('pt-BR');
+Paliari\I18n::instance()->setCachePath(__DIR__ . '/tmp')->saveCache('pt-BR');
 ```
 
-When a cache file exists for a locale it is loaded instead of parsing the yml files.
+When a cache file exists for a locale it is loaded instead of parsing the yml files, so run
+`saveCache()` again after changing them. The cache is written atomically and `saveCache()` throws
+`RuntimeException` when the cache path cannot be created or written.
 
 #### Tests
 
